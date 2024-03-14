@@ -3,7 +3,6 @@
 This module implements utility methods for Odin Server.
 """
 import sys
-
 from tornado import version_info
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop

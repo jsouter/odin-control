@@ -19,7 +19,6 @@ Created on 20 June 2018
 
 Alan Greer, OSL
 """
-from __future__ import print_function
 
 import logging
 import os
