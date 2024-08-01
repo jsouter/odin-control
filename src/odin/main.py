@@ -16,10 +16,11 @@ from tornado.autoreload import add_reload_hook
 from odin.http.server import HttpServer
 from odin.config.parser import ConfigParser, ConfigError
 from odin.logconfig import add_graylog_handler
-
+from typing import List, Optional
 _stop_ioloop = False  # Global variable to indicate ioloop should be shut down
 
-def main(argv=None):
+
+def main(argv: Optional[List[str]] = None):
     """Run the odin-control server.
 
     This function is the main entry point for the odin-control server. It parses configuration
@@ -64,7 +65,7 @@ def main(argv=None):
             config.graylog_static_fields
         )
 
-     # Get the Tornado ioloop instance
+    # Get the Tornado ioloop instance
     ioloop = tornado.ioloop.IOLoop.instance()
 
     # Launch the HTTP server with the parsed configuration

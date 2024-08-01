@@ -3,6 +3,10 @@
 Tim Nicholls, STFC Application Engineering
 """
 
+from typing import List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from odin.http.handlers.base import BaseApiHandler
+
 
 class Route(object):
     """Base class for server routes.
@@ -15,9 +19,9 @@ class Route(object):
     def __init__(self):
         """Initialse the Route object."""
         # Initialise empty list of handlers
-        self.handlers = []
+        self.handlers: List["BaseApiHandler"] = []
 
-    def add_handler(self, handler):
+    def add_handler(self, handler: "BaseApiHandler"):
         """Add a handler to the route.
 
         This method as a handler to the route, using a URLspec-formtted tuple.

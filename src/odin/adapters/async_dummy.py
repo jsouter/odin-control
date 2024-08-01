@@ -16,7 +16,9 @@ from odin.adapters.async_adapter import AsyncApiAdapter
 from odin.adapters.async_parameter_tree import AsyncParameterTree
 from odin.adapters.base_parameter_tree import ParameterTreeError
 from odin.util import decode_request_body, run_in_executor
-
+from typing import List, Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from odin.adapters.adapter import ApiAdapter
 
 class AsyncDummyAdapter(AsyncApiAdapter):
     """Dummy asynchronous adapter class for the ODIN server.
@@ -63,11 +65,11 @@ class AsyncDummyAdapter(AsyncApiAdapter):
         # Create the thread pool executor
         self.executor = concurrent.futures.ThreadPoolExecutor()
 
-    async def initialize(self, adapters):
+    async def initialize(self, adapters: Optional[List["ApiAdapter"]]):
         """Initalize the adapter.
 
-        This dummy method demonstrates that async adapter initialisation can be performed
-        asynchronously.
+        This dummy method demonstrates that async adapter initialisation can be
+        performed asynchronously.
 
         :param adapters: list of adapters loaded into the server
         """

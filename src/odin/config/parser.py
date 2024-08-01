@@ -10,6 +10,9 @@ from functools import partial
 import tornado.options
 from configparser import ConfigParser as NativeConfigParser
 
+from typing import *
+T = TypeVar("T")
+
 
 class ConfigError(Exception):
     """ConfigParser exception class.
@@ -40,13 +43,13 @@ class ConfigParser(object):
     [adapter.<adapter_name>].
     """
 
-    def __init__(self, has_adapters=True):
+    def __init__(self, has_adapters: bool = True):
         """Initialise the configuration parser.
 
         :param has_adapters: if True, automatically define an --adapters option in the parser
         """
         # Initialise allowed options sections
-        self.allowed_options = {
+        self.allowed_options: Mapping[str, "ConfigOption"] = {
             'server':  {},
             'tornado': {},
         }
@@ -71,8 +74,15 @@ class ConfigParser(object):
             self.define('adapters', option_type=str, multiple=True,
                         option_help='Comma-separated list of API adapters to load')
 
-    def define(self, name, default=None, option_type=None, option_help=None, metavar=None,
-               multiple=False, action='store', callback=None):
+    def define(self,
+               name: str,
+               default: Optional[T] = None,
+               option_type: Optional[type] = None,
+               option_help: Optional[str] = None,
+               metavar: Optional[str] = None,
+               multiple: bool = False,
+               action: str = 'store',
+               callback: Optional[Callable[[T], None]] = None):
         """Define an option to be parsed from the command-line and/or a configuration file.
 
         This method replicates the functionality of the tornado options define(), allowing
@@ -115,7 +125,7 @@ class ConfigParser(object):
         # flag action has been specified, i.e. store_true or store_false, don't add the
         # type and metavar keyword arguments as their presence causes an exception to be
         # thrown
-        add_kwargs = {
+        add_kwargs: Dict[str, Any] = {
             'action': action, 'default': default,
             'help': option_help,
         }
@@ -131,7 +141,7 @@ class ConfigParser(object):
         # without error throughout the lifetime of the instance
         setattr(self, name, None)
 
-    def parse(self, args=None):
+    def parse(self, args: Optional[List[str]] = None):
         """Parse command-line and file configuration options.
 
         This method parses command-line and file (if specified a ``--config`` argument)
@@ -189,14 +199,14 @@ class ConfigParser(object):
         # Run the tornado parser callbacks to replicate the tornado parser behaviour
         tornado.options.options.run_parse_callbacks()
 
-    def _parse_file_config(self, config_file):
+    def _parse_file_config(self, config_file: str):
         """Parse a configuration file (INTERNAL METHOD).
 
         :param config_file: name of configuration file to parse
         :return: container of resolved file configuration options
         """
         # Initialise a container for resolved file configuration options
-        file_config = {}
+        file_config: Mapping[str, Any] = {}
         for section in self.allowed_options:
             file_config[section] = {}
 
@@ -259,13 +269,13 @@ class ConfigParser(object):
                     tornado_opts[opt].name, tornado_opts[opt].type, tornado_opts[opt].default
                 )
 
-    def _version_callback(self, value):
+    def _version_callback(self, value: Any):
         """Print the odin server version information and exit."""
         if value:
             print("odin server {}".format(get_versions()['version']))
             sys.exit(0)
 
-    def resolve_adapters(self, adapter_list=None):
+    def resolve_adapters(self, adapter_list: Optional[List[str]] = None):
         """Resolve any adapter sections present in the configuration file.
 
         This method resovles adapter sections preent in the configuration file into a usable
@@ -276,7 +286,7 @@ class ConfigParser(object):
 
         :return: dict of AdapterConfig objects from the configuration file
         """
-        resolved_adapters = {}
+        resolved_adapters: Dict[str, AdapterConfig] = {}
 
         # If no adapter names to resolve were specified, determine if any were given
         # in the command line or file configuration.
@@ -336,7 +346,7 @@ class ConfigParser(object):
         return (name for section in self.allowed_options for name in self.allowed_options[section])
 
 
-def _parse_multiple_arg(arg, arg_type=str, splitchar=','):
+def _parse_multiple_arg(arg: str, arg_type: type = str, splitchar: str = ','):
     """Parse comma-delimited multiple arguments into a typed list.
 
     This function splits comma-delimited multiple-valued options from arguments or configuration
@@ -354,7 +364,6 @@ def _parse_multiple_arg(arg, arg_type=str, splitchar=','):
     except ValueError:
         raise ConfigError('Multiple-valued argument contained element of incorrect type')
 
-
 class ConfigOption(object):
     """A configuration option container class.
 
@@ -362,7 +371,11 @@ class ConfigOption(object):
     its type, default value and whether it has multiple values
     """
 
-    def __init__(self, name, option_type=None, default=None, multiple=False, callback=None):
+    def __init__(self, name: str,
+                 option_type: Optional[type] = None,
+                 default: Optional[T] = None,
+                 multiple: bool = False,
+                 callback: Optional[Callable[[T], None]]=None):
         """Initialise the ConfigOption object.
 
         :param name: name of the option
@@ -403,7 +416,7 @@ class AdapterConfig(object):
     be set as attributes using the set() method
     """
 
-    def __init__(self, name, module):
+    def __init__(self, name: str, module: str):
         """Initialise the AdapterConfig object.
 
         :param name: name of the adapter
@@ -411,9 +424,9 @@ class AdapterConfig(object):
         """
         self.name = name
         self.module = module
-        self._options = {}
+        self._options: Dict[str, Any] = {}
 
-    def set(self, option, value):
+    def set(self, option: str, value: Any):
         """Set an option for the adapter configuration object.
 
         :param option: name of the option
@@ -422,7 +435,7 @@ class AdapterConfig(object):
         """
         self._options[option] = value
 
-    def __contains__(self, option):
+    def __contains__(self, option: str):
         """Containment check operator - allows ``in`` to check for presence of option.
 
         :param option: name of option to check for
@@ -430,7 +443,7 @@ class AdapterConfig(object):
         """
         return option in self._options
 
-    def __getattr__(self, option):
+    def __getattr__(self, option: str):
         """Attribute getter allowing adapter options to be accessed by object.option syntax.
 
         :param option: name option to get

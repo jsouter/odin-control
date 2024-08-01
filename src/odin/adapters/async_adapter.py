@@ -8,7 +8,8 @@ import asyncio
 import logging
 import inspect
 
-from odin.adapters.adapter import ApiAdapter, ApiAdapterResponse
+from odin.adapters.adapter import ApiAdapter, ApiAdapterResponse, ApiAdapterRequest
+from typing import Any, List, Optional
 
 
 class AsyncApiAdapter(ApiAdapter):
@@ -22,7 +23,7 @@ class AsyncApiAdapter(ApiAdapter):
 
     is_async = True
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the AsyncApiAdapter object.
 
         :param kwargs: keyword argument list that is copied into options dictionary
@@ -32,22 +33,25 @@ class AsyncApiAdapter(ApiAdapter):
     def __await__(self):
         """Make AsyncApiAdapter objects awaitable.
 
-        This magic method makes the instantiation of AsyncApiAdapter objects awaitable. This allows
-        any underlying async and awaitable attributes, e.g. an AsyncParameterTree, to be correctly
-        awaited when the adapter is loaded."""
+        This magic method makes the instantiation of AsyncApiAdapter objects awaitable.
+        This allows any underlying async and awaitable attributes, e.g. an
+        AsyncParameterTree, to be correctly awaited when the adapter is loaded."""
         async def closure():
             """Await all async attributes of the adapter."""
-            awaitable_attrs = [attr for attr in self.__dict__.values() if inspect.isawaitable(attr)]
+            awaitable_attrs = [
+                attr for attr in self.__dict__.values() if inspect.isawaitable(attr)
+            ]
             await asyncio.gather(*awaitable_attrs)
             return self
 
         return closure().__await__()
 
-    async def initialize(self, adapters):
+    async def initialize(self, adapters: Optional[List[ApiAdapter]]):
         """Initialize the AsyncApiAdapter after it has been registered by the API Route.
 
         This is an abstract implementation of the initialize mechinism that allows
-        an adapter to receive a list of loaded adapters, for Inter-adapter communication.
+        an adapter to receive a list of loaded adapters, for Inter-adapter
+        communication.
         :param adapters: a dictionary of the adapters loaded by the API route.
         """
 
@@ -56,16 +60,17 @@ class AsyncApiAdapter(ApiAdapter):
     async def cleanup(self):
         """Clean up adapter state.
 
-        This is an abstract implementation of the cleanup mechanism provided to allow adapters
-        to clean up their state (e.g. disconnect cleanly from the device being controlled, set
-        some status message).
+        This is an abstract implementation of the cleanup mechanism provided to allow 
+        adapters to clean up their state (e.g. disconnect cleanly from the device being
+        controlled, set some status message).
         """
         pass
 
-    async def get(self, path, request):
+    async def get(self, path: str, request: ApiAdapterRequest) -> ApiAdapterResponse:
         """Handle an HTTP GET request.
 
-        This method is an abstract implementation of the GET request handler for AsyncApiAdapter.
+        This method is an abstract implementation of the GET request handler for
+        AsyncApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -77,10 +82,11 @@ class AsyncApiAdapter(ApiAdapter):
         response = "GET method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    async def post(self, path, request):
+    async def post(self, path: str, request: ApiAdapterRequest) -> ApiAdapterResponse:
         """Handle an HTTP POST request.
 
-        This method is an abstract implementation of the POST request handler for AsyncApiAdapter.
+        This method is an abstract implementation of the POST request handler for
+        AsyncApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -92,10 +98,11 @@ class AsyncApiAdapter(ApiAdapter):
         response = "POST method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    async def put(self, path, request):
+    async def put(self, path: str, request: ApiAdapterRequest) -> ApiAdapterResponse:
         """Handle an HTTP PUT request.
 
-        This method is an abstract implementation of the PUT request handler for AsyncApiAdapter.
+        This method is an abstract implementation of the PUT request handler for
+        AsyncApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -107,10 +114,11 @@ class AsyncApiAdapter(ApiAdapter):
         response = "PUT method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    async def delete(self, path, request):
+    async def delete(self, path: str, request: ApiAdapterRequest) -> ApiAdapterResponse:
         """Handle an HTTP DELETE request.
 
-        This method is an abstract implementation of the DELETE request handler for ApiAdapter.
+        This method is an abstract implementation of the DELETE request handler for
+        ApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler

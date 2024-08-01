@@ -10,6 +10,9 @@ import tornado.web
 
 from odin.adapters.adapter import ApiAdapterResponse
 from odin.util import wrap_result
+from typing import Any, Optional, TYPE_CHECKING, Union
+if TYPE_CHECKING:
+    from odin.http.routes.route import Route
 API_VERSION = 0.1
 
 
@@ -17,7 +20,7 @@ class ApiError(Exception):
     """Simple exception class for API-related errors."""
 
 
-def validate_api_request(required_version):
+def validate_api_request(required_version: Union[str, int, float]):
     """Validate an API request to the ApiHandler.
 
     This decorator checks that API version in the URI of a requst is correct and that the subsystem
@@ -52,7 +55,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
     also enforces a uniform response with the appropriate Content-Type header.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Construct the BaseApiHandler object.
 
         This method just calls the base class constructor and sets the route object to None.
@@ -60,7 +63,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
         self.route = None
         super(BaseApiHandler, self).__init__(*args, **kwargs)
 
-    def initialize(self, route, enable_cors, cors_origin):
+    def initialize(self, route: "Route", enable_cors: bool, cors_origin):
         """Initialize the API handler.
 
         :param route: ApiRoute object calling the handler (allows adapters to be resolved)
@@ -73,7 +76,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
             self.set_header("Access-Control-Allow-Headers", "x-requested-with,content-type")
             self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
 
-    def respond(self, response):
+    def respond(self, response: ApiAdapterResponse):
         """Respond to an API request.
 
         This method transforms an ApiAdapterResponse object into the appropriate request handler
@@ -107,7 +110,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
         # Set status to indicate successful request with no content returned
         self.set_status(204)
 
-    def get(self, subsystem, path=''):
+    def get(self, subsystem: str, path: str = '') -> None:
         """Handle an API GET request.
 
         This is an abstract method which must be implemented by derived classes.
@@ -117,7 +120,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
         """
         raise NotImplementedError()
 
-    def post(self, subsystem, path=''):
+    def post(self, subsystem: str, path: str = '') -> None:
         """Handle an API POST request.
 
         This is an abstract method which must be implemented by derived classes.
@@ -127,7 +130,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
         """
         raise NotImplementedError()
 
-    def put(self, subsystem, path=''):
+    def put(self, subsystem: str, path: str = '') -> None:
         """Handle an API PUT request.
 
         This is an abstract method which must be implemented by derived classes.
@@ -137,7 +140,7 @@ class BaseApiHandler(tornado.web.RequestHandler):
         """
         raise NotImplementedError()
 
-    def delete(self, subsystem, path=''):
+    def delete(self, subsystem: str, path: str = '') -> None:
         """Handle an API DELETE request.
 
         This is an abstract method which must be implemented by derived classes.

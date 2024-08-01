@@ -17,7 +17,7 @@ class ApiHandler(BaseApiHandler):
     """
 
     @validate_api_request(API_VERSION)
-    def get(self, subsystem, path=''):
+    def get(self, subsystem: str, path: str = ''):
         """Handle an API GET request.
 
         :param subsystem: subsystem element of URI, defining adapter to be called
@@ -27,7 +27,7 @@ class ApiHandler(BaseApiHandler):
         self.respond(response)
 
     @validate_api_request(API_VERSION)
-    def post(self, subsystem, path=''):
+    def post(self, subsystem: str, path: str = ''):
         """Handle an API POST request.
 
         :param subsystem: subsystem element of URI, defining adapter to be called
@@ -37,7 +37,7 @@ class ApiHandler(BaseApiHandler):
         self.respond(response)
 
     @validate_api_request(API_VERSION)
-    def put(self, subsystem, path=''):
+    def put(self, subsystem: str, path: str = ''):
         """Handle an API PUT request.
 
         :param subsystem: subsystem element of URI, defining adapter to be called
@@ -47,7 +47,7 @@ class ApiHandler(BaseApiHandler):
         self.respond(response)
 
     @validate_api_request(API_VERSION)
-    def delete(self, subsystem, path=''):
+    def delete(self, subsystem: str, path: str = ''):
         """Handle an API DELETE request.
 
         :param subsystem: subsystem element of URI, defining adapter to be called

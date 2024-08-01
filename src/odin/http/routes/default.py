@@ -25,7 +25,7 @@ class DefaultHandler(tornado.web.StaticFileHandler):
 class DefaultRoute(Route):
     """Default URL Route for the ODIN server."""
 
-    def __init__(self, path, default_filename='index.html'):
+    def __init__(self, path: str, default_filename: str = 'index.html'):
         """Initialise the default route, adding a handler.
 
         This route provides the default view for the ODIN server, rendering

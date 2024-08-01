@@ -40,7 +40,7 @@ class ProxyTarget(BaseProxyTarget):
     for use in the ProxyAdapter.
     """
 
-    def __init__(self, name, url, request_timeout):
+    def __init__(self, name: str, url: str, request_timeout: float):
         """
         Initialise the ProxyTarget object.
 

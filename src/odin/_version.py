@@ -15,7 +15,7 @@ import os
 import re
 import subprocess
 import sys
-
+from typing import List
 
 def get_keywords():
     """Get the keywords needed to look up the version information."""
@@ -32,6 +32,12 @@ def get_keywords():
 
 class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
+    VCS: str
+    style: str
+    tag_prefix: str
+    parentdir_prefix: str
+    versionfile_source: str
+    verbose: bool
 
 
 def get_config():
@@ -103,16 +109,16 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
     return stdout, p.returncode
 
 
-def versions_from_parentdir(parentdir_prefix, root, verbose):
+def versions_from_parentdir(parentdir_prefix: str, root: str, verbose: bool):
     """Try to determine the version from the parent directory name.
 
     Source tarballs conventionally unpack into a directory that includes both
     the project name and a version string. We will also support searching up
     two directory levels for an appropriately named parent directory
     """
-    rootdirs = []
+    rootdirs: List[str] = []
 
-    for i in range(3):
+    for _ in range(3):
         dirname = os.path.basename(root)
         if dirname.startswith(parentdir_prefix):
             return {"version": dirname[len(parentdir_prefix):],

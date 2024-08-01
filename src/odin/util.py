@@ -8,7 +8,17 @@ from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
 from odin.async_util import get_async_event_loop, wrap_async
 
-def decode_request_body(request):
+def decode_request_body(request: "ApiAdapterRequest") -> "BodyType":
+=======
+from typing import TYPE_CHECKING, Union
+if TYPE_CHECKING:
+    from odin.adapters.adapter import ApiAdapterResponse, ApiAdapterRequest
+    from asyncio import Future
+    from concurrent.futures import ThreadPoolExecutor
+from odin.async_util import get_async_event_loop, wrap_async
+
+
+def decode_request_body(request: "ApiAdapterRequest"):
     """Extract the body from a request.
 
     This might be decoded from json if specified by the request header.
@@ -18,7 +28,7 @@ def decode_request_body(request):
     try:
         body_type = request.headers["Content-Type"]
         if body_type == "application/json":
-            body = json_decode(request.body)
+            body: "BodyType" = json_decode(request.body)
         else:
             body = request.body
     except (TypeError):
@@ -33,7 +43,8 @@ def wrap_result(result, is_async=True):
     This is to allow common functions for e.g. request validation, to be used in both
     async and sync code across python variants.
 
-    :param is_async: optional flag for if desired outcome is a result wrapped in a future
+    :param is_async: optional flag for if desired outcome is a result wrapped in
+    a future
 
     :return: either the result or a Future wrapping the result
     """
@@ -43,15 +54,17 @@ def wrap_result(result, is_async=True):
         return result
 
 
-def run_in_executor(executor, func, *args):
+def run_in_executor(executor: ThreadPoolExecutor,
+                    func: Callable[..., Any],
+                    *args: Any) -> Awaitable[Any]:
     """
     Run a function asynchronously in an executor.
 
-    This method extends the behaviour of Tornado IOLoop equivalent to allow nested task execution
-    without having to modify the underlying asyncio loop creation policy on python 3. If the
-    current execution context does not have a valid IO loop, a new one will be created and used.
-    The method returns a tornado Future instance, allowing it to be awaited in an async method where
-    applicable.
+    This method extends the behaviour of Tornado IOLoop equivalent to allow nested task
+    execution without having to modify the underlying asyncio loop creation policy on
+    python 3. If the current execution context does not have a valid IO loop, a new
+    one will be created and used. The method returns a tornado Future instance,
+    allowing it to be awaited in an async method where applicable.
 
     :param executor: a concurrent.futures.Executor instance to run the task in
     :param func: the function to execute
@@ -62,8 +75,8 @@ def run_in_executor(executor, func, *args):
     # Try to get the current asyncio event loop, otherwise create a new one
     get_async_event_loop()
 
-    # Run the function in the specified executor, handling tornado version 4 where there was no
-    # run_in_executor implementation
+    # Run the function in the specified executor, handling tornado version 4 where
+    # there was no run_in_executor implementation
     if version_info[0] <= 4:
         future = executor.submit(func, *args)
     else:

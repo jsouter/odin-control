@@ -6,9 +6,10 @@ asynchronous adapters.
 Tim Nicholls, STFC Detector System Software Group.
 """
 import asyncio
+from typing import Any, Awaitable, Callable
 
 
-def wrap_async(object):
+def wrap_async(object: Any) -> "asyncio.Future[Any]":
     """Wrap an object in an async future.
 
     This function wraps an object in an async future and is called from wrap_result when
@@ -18,7 +19,7 @@ def wrap_async(object):
     :param object: object to wrap in a future
     :return: a Future with object as its result
     """
-    future = asyncio.Future()
+    future: Awaitable[Any] = asyncio.Future()
     future.set_result(object)
     return future
 
@@ -26,8 +27,8 @@ def wrap_async(object):
 def get_async_event_loop():
     """Get the asyncio event loop.
 
-    This function obtains and returns the current asyncio event loop. If no loop is present, a new
-    one is created and set as the event loop.
+    This function obtains and returns the current asyncio event loop.
+    If no loop is present, a new one is created and set as the event loop.
 
     :return: an asyncio event loop
     """
@@ -40,11 +41,12 @@ def get_async_event_loop():
     return loop
 
 
-def run_async(func, *args, **kwargs):
+def run_async(func: Callable[..., Any], *args: Any, **kwargs: Any):
     """Run an async function synchronously in an event loop.
 
-    This function can be used to run an async function synchronously, i.e. without the need for an
-    await() call. The function is run on an asyncio event loop and the result is returned.
+    This function can be used to run an async function synchronously, i.e. without the
+    need for an await() call.
+    The function is run on an asyncio event loop and the result is returned.
 
     :param func: async function to run
     :param args: positional arguments to function

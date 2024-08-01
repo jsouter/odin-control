@@ -67,13 +67,13 @@ class BaseProxyTarget(object):
     asynchronous implementations. It is not intended to be instantiated directly.
     """
 
-    def __init__(self, name, url, request_timeout):
+    def __init__(self, name: str, url: str, request_timeout: float):
         """
         Initialise the BaseProxyTarget object.
 
-        Sets up the default state of the base target object, builds the appropriate parameter tree
-        to be handled by the containing adapter and sets up the HTTP client for making requests
-        to the target.
+        Sets up the default state of the base target object, builds the appropriate
+        parameter tree to be handled by the containing adapter and sets up the HTTP
+        client for making requests to the target.
 
         :param name: name of the proxy target
         :param url: URL of the remote target
@@ -115,10 +115,10 @@ class BaseProxyTarget(object):
         """
         Get data from the remote target.
 
-        This method requests data from the remote target by issuing a GET request to the target
-        URL, and then updates the local proxy target data and status information according to the
-        response. The request is sent to the target by the implementation-specific _send_request
-        method.
+        This method requests data from the remote target by issuing a GET request to
+        the target URL, and then updates the local proxy target data and status
+        information according to the response. The request is sent to the target by the
+        implementation-specific _send_request method.
 
         :param path: path to data on remote target
         :param get_metadata: flag indicating if metadata is to be requested
@@ -138,14 +138,14 @@ class BaseProxyTarget(object):
         # Send the request to the remote target
         return self._send_request(request, path, get_metadata)
 
-    def remote_set(self, path, data):
+    def remote_set(self, path: str, data):
         """
         Set data on the remote target.
 
-         his method sends data to the remote target by issuing a PUT request to the target
-        URL, and then updates the local proxy target data and status information according to the
-        response. The request is sent to the target by the implementation-specific _send_request
-        method.
+        This method sends data to the remote target by issuing a PUT request to the
+        target URL, and then updates the local proxy target data and status information
+        according to the response. The request is sent to the target by the
+        implementation-specific _send_request method.
 
         :param path: path to data on remote target
         :param data: data to set on remote target
@@ -166,15 +166,20 @@ class BaseProxyTarget(object):
         # Send the request to the remote target
         return self._send_request(request, path)
 
-    def _process_response(self, response, path, get_metadata):
+    def _process_response(self,
+                          response: Union[tornado.httpclient.HTTPResponse, Exception],
+                          path: str,
+                          get_metadata: bool):
         """
         Process a response from the remote target.
 
-        This method processes the response of a remote target to a request. The response is used to
-        update the local proxy target data metadata and status as appropriate. If the request failed
-        the returned exception is decoded and the status updated accordingly.
+        This method processes the response of a remote target to a request. The response
+        is used to update the local proxy target data metadata and status as
+        appropriate. If the request failed the returned exception is decoded and the
+        status updated accordingly.
 
-        :param response: HTTP response from the target, or an exception if the response failed
+        :param response: HTTP response from the target, or an exception if the response
+            failed
         :param path: path of data being updated
         :param get_metadata: flag indicating if metadata was requested
         """
@@ -244,8 +249,8 @@ class BaseProxyAdapter(object):
     """
     Proxy adapter base mixin class.
 
-    This mixin class implements the core functionality required by all concrete proxy adapter
-    implementations.
+    This mixin class implements the core functionality required by all concrete proxy
+    adapter implementations.
     """
 
     TIMEOUT_CONFIG_NAME = "request_timeout"
@@ -315,7 +320,7 @@ class BaseProxyAdapter(object):
         self.param_tree = ParameterTree(tree)
         self.meta_param_tree = ParameterTree(meta_tree)
 
-    def proxy_get(self, path, get_metadata):
+    def proxy_get(self, path: str, get_metadata: bool):
         """
         Get data from the proxy targets.
 
@@ -336,7 +341,7 @@ class BaseProxyAdapter(object):
 
         return target_responses
 
-    def proxy_set(self, path, data):
+    def proxy_set(self, path: str, data):
         """
         Set data on the proxy targets.
 
@@ -357,7 +362,7 @@ class BaseProxyAdapter(object):
 
         return target_responses
 
-    def _resolve_response(self, path, get_metadata=False):
+    def _resolve_response(self, path: str, get_metadata: bool = False):
         """
         Resolve the response to a proxy target get or set request.
 
@@ -389,7 +394,7 @@ class BaseProxyAdapter(object):
         return (response, status_code)
 
     @staticmethod
-    def _resolve_path(path):
+    def _resolve_path(path: str):
         """
         Resolve the specified path into a path element and target.
 

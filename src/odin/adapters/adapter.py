@@ -7,6 +7,8 @@ Tim Nicholls, STFC Application Engineering Group
 import logging
 
 from odin.util import wrap_result
+from typing import Any, Callable, Dict, List, Optional
+
 
 class ApiAdapter(object):
     """
@@ -18,33 +20,36 @@ class ApiAdapter(object):
     """
 
     is_async = False
+    options: Dict[str, Any]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the ApiAdapter object.
 
         :param kwargs: keyword argument list that is copied into options dictionary
         """
         super(ApiAdapter, self).__init__()
-        self.name = type(self).__name__
+        self.name: str = type(self).__name__
 
         # Load any keyword arguments into the adapter options dictionary
         self.options = {}
         for kw in kwargs:
             self.options[kw] = kwargs[kw]
 
-    def initialize(self, adapters):
+    def initialize(self, adapters: Optional[List["ApiAdapter"]]):
         """Initialize the ApiAdapter after it has been registered by the API Route.
 
         This is an abstract implementation of the initialize mechinism that allows
-        an adapter to receive a list of loaded adapters, for Inter-adapter communication.
+        an adapter to receive a list of loaded adapters, for Inter-adapter
+        communication.
         :param adapters: a dictionary of the adapters loaded by the API route.
         """
         pass
 
-    def get(self, path, request):
+    def get(self, path: str, request: "ApiAdapterRequest") -> "ApiAdapterResponse":
         """Handle an HTTP GET request.
 
-        This method is an abstract implementation of the GET request handler for ApiAdapter.
+        This method is an abstract implementation of the GET request handler for
+        ApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -55,10 +60,11 @@ class ApiAdapter(object):
         response = "GET method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    def post(self, path, request):
+    def post(self, path: str, request: "ApiAdapterRequest") -> "ApiAdapterResponse":
         """Handle an HTTP POST request.
 
-        This method is an abstract implementation of the POST request handler for ApiAdapter.
+        This method is an abstract implementation of the POST request handler for
+        ApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -69,10 +75,11 @@ class ApiAdapter(object):
         response = "POST method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    def put(self, path, request):
+    def put(self, path: str, request: "ApiAdapterRequest") -> "ApiAdapterResponse":
         """Handle an HTTP PUT request.
 
-        This method is an abstract implementation of the PUT request handler for ApiAdapter.
+        This method is an abstract implementation of the PUT request handler for
+        ApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -83,10 +90,11 @@ class ApiAdapter(object):
         response = "PUT method not implemented by {}".format(self.name)
         return ApiAdapterResponse(response, status_code=400)
 
-    def delete(self, path, request):
+    def delete(self, path: str, request: "ApiAdapterRequest") -> "ApiAdapterResponse":
         """Handle an HTTP DELETE request.
 
-        This method is an abstract implementation of the DELETE request handler for ApiAdapter.
+        This method is an abstract implementation of the DELETE request handler for
+        ApiAdapter.
 
         :param path: URI path of resource
         :param request: HTTP request object passed from handler
@@ -100,9 +108,9 @@ class ApiAdapter(object):
     def cleanup(self):
         """Clean up adapter state.
 
-        This is an abstract implementation of the cleanup mechanism provided to allow adapters
-        to clean up their state (e.g. disconnect cleanly from the device being controlled, set
-        some status message).
+        This is an abstract implementation of the cleanup mechanism provided to allow
+        adapters to clean up their state (e.g. disconnect cleanly from the device being
+        controlled, set some status message).
         """
         pass
 
@@ -113,8 +121,8 @@ class ApiAdapterRequest(object):
     Emulate the HTTPServerRequest class passed as an argument to adapter HTTP
     verb methods (GET, PUT etc), for internal communication between adapters.
     """
-    def __init__(self, data, content_type="application/vnd.odin-native",
-                 accept="application/json", remote_ip="LOCAL"):
+    def __init__(self, data: Any, content_type: str = "application/vnd.odin-native",
+                 accept: str = "application/json", remote_ip: str = "LOCAL"):
         """Initialize the Adapter Request body and headers.
 
         Create the header and body in the same way as in a HTTP Request.
@@ -129,7 +137,7 @@ class ApiAdapterRequest(object):
             "Accept": self.response_type
         }
 
-    def set_content_type(self, content_type):
+    def set_content_type(self, content_type: str):
         """Set the content type header for the request
 
         The content type is filtered by the decorator "request_types". If
@@ -138,7 +146,7 @@ class ApiAdapterRequest(object):
         self.content_type = content_type
         self.headers["Content-Type"] = content_type
 
-    def set_response_type(self, response_type):
+    def set_response_type(self, response_type: str):
         """Set the type of response accepted by the request
 
         The response type is filtered by the decorator "response_types". If
@@ -147,7 +155,7 @@ class ApiAdapterRequest(object):
         self.response_type = response_type
         self.headers["Accept"] = response_type
 
-    def set_remote_ip(self, ip):
+    def set_remote_ip(self, ip: str):
         """Set the Remote IP of the request
 
         This is only used in the event that an adapter has not implemented
@@ -166,7 +174,8 @@ class ApiAdapterResponse(object):
     status code.
     """
 
-    def __init__(self, data, content_type="text/plain", status_code=200):
+    def __init__(
+            self, data: Any, content_type: str = "text/plain", status_code: int = 200):
         """Initialise the APiAdapterResponse object.
 
         :param data: data to return from data
@@ -177,14 +186,14 @@ class ApiAdapterResponse(object):
         self.content_type = content_type
         self.status_code = status_code
 
-    def set_content_type(self, content_type):
+    def set_content_type(self, content_type: str):
         """Set the content type for the adapter response.
 
         :param content_type: response content type
         """
         self.content_type = content_type
 
-    def set_status_code(self, status_code):
+    def set_status_code(self, status_code: int):
         """Set the HTTP status code for the adapter response.
 
         :param status_code: HTTP status code
@@ -192,7 +201,7 @@ class ApiAdapterResponse(object):
         self.status_code = status_code
 
 
-def request_types(*oargs):
+def request_types(*oargs: str):
     """
     Decorator method to define legal content types that adapter method will accept.
 
@@ -211,9 +220,11 @@ def request_types(*oargs):
     :param oargs: a variable length list of acceptable content types
     :return: decorator context
     """
-    def decorator(func):
+    def decorator(
+        func: Callable[[ApiAdapter, str, ApiAdapterRequest], ApiAdapterResponse]
+    ):
         """Function decorator."""
-        def wrapper(_self, path, request):
+        def wrapper(_self: ApiAdapter, path: str, request: ApiAdapterRequest):
             """Inner method wrapper."""
             # Validate the Content-Type header in the request against allowed types
             if 'Content-Type' in request.headers:
@@ -227,35 +238,39 @@ def request_types(*oargs):
     return decorator
 
 
-def response_types(*oargs, **okwargs):
+def response_types(*oargs: str, **okwargs: Any):
     """
     Decorator method to define legal response types and a default for an adapter method.
 
     This method compares the HTTP request Accept header with a list of acceptable
     response types. If there is a match, the response type is set accordingly, otherwise
-    an HTTP 406 error code is returned. A default type is also allowable, so if the request
-    fails to specify a type (e.g. '*/*') then this will be used.
+    an HTTP 406 error code is returned. A default type is also allowable, so if the
+    request fails to specify a type (e.g. '*/*') then this will be used.
 
-    Typical usage for this would be, in an adapter, to decorate a verb method as follows:
+    Typical usage for this would be, in an adapter, to decorate a verb method as
+    follows:
 
     @response_type('application/json', 'text/html', default='text/html')
     def get(self, path, request):
     <snip>
 
-    to specify that the method has acceptable resonse types of JSON, HTML, defaulting to HTML
+    to specify that the method has acceptable resonse types of JSON, HTML, defaulting to
+    HTML
 
     :param oargs: a variable length list of  acceptable response types
     :param okwargs: keyword argument(s), allowing default type to be specified.
     :return: decorator context
     """
-    def decorator(func):
+    def decorator(
+        func: Callable[[ApiAdapter, str, ApiAdapterRequest], ApiAdapterResponse]
+    ):
         """Function decorator."""
-        def wrapper(_self, path, request):
+        def wrapper(_self: ApiAdapter, path: str, request: ApiAdapterRequest):
             """Inner function wrapper."""
             response_type = None
 
-            # If Accept header is present, resolve the response type appropriately, otherwise
-            # coerce to the default before calling the decorated function
+            # If Accept header is present, resolve the response type appropriately,
+            # otherwise coerce to the default before calling the decorated function
             if 'Accept' in request.headers:
 
                 if request.headers['Accept'] == '*/*':
@@ -270,15 +285,17 @@ def response_types(*oargs, **okwargs):
                             response_type = accept_type
                             break
 
-                # If it was not possible to resolve a response type or there was not default
-                # given, return an error code 406
+                # If it was not possible to resolve a response type or there was not
+                # default given, return an error code 406
                 if response_type is None:
                     response = ApiAdapterResponse(
                         "Requested content types not supported", status_code=406
                     )
                     return wrap_result(response, _self.is_async)
             else:
-                response_type = okwargs['default'] if 'default' in okwargs else 'text/plain'
+                response_type = okwargs[
+                    'default'
+                ] if 'default' in okwargs else 'text/plain'
                 request.headers['Accept'] = response_type
 
             # Call the decorated function
@@ -287,7 +304,7 @@ def response_types(*oargs, **okwargs):
     return decorator
 
 
-def wants_metadata(request):
+def wants_metadata(request: ApiAdapterRequest):
     """
     Determine if a client request wants metadata to be included in the response.
 
