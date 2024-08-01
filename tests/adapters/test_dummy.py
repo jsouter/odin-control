@@ -5,11 +5,7 @@ import pytest
 from odin.adapters.dummy import DummyAdapter, IacDummyAdapter
 from odin.adapters.adapter import (ApiAdapter, ApiAdapterRequest,
                                    ApiAdapterResponse, request_types, response_types)
-
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock
-else:                         # pragma: no cover
-    from mock import Mock
+from unittest.mock import Mock
 
 
 class DummyAdapterTestFixture(object):

@@ -2,15 +2,8 @@ import sys
 import json
 
 import pytest
-
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock
-    import asyncio
-    async_allowed = True
-else:                         # pragma: no cover
-    from mock import Mock
-    async_allowed = False
-
+from unittest.mock import Mock
+import asyncio
 from odin.http.handlers.base import BaseApiHandler, API_VERSION, ApiError, validate_api_request
 from odin.http.routes.api import ApiHandler
 from odin.adapters.adapter import ApiAdapterResponse
@@ -21,7 +14,7 @@ from odin.util import wrap_result
 class TestHandler(object):
     """Class to create appropriate mocked objects to allow the ApiHandler to be tested."""
 
-    def __init__(self, handler_cls, async_adapter=async_allowed, enable_cors=False):
+    def __init__(self, handler_cls, async_adapter=True, enable_cors=False):
         """Initialise the TestHandler."""
         self.enable_cors = enable_cors
 
@@ -88,12 +81,8 @@ class TestHandler(object):
         )
         self.respond(response)
 
-if async_allowed:
-    fixture_params = [True, False]
-    fixture_ids = ["async", "sync"]
-else:
-    fixture_params = [False]
-    fixture_ids = ["sync"]
+fixture_params = [True, False]
+fixture_ids = ["async", "sync"]
 
 @pytest.fixture(scope="class", params=fixture_params, ids=fixture_ids)
 def test_api_handler(request):

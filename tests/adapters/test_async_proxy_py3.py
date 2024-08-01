@@ -10,21 +10,17 @@ from io import StringIO
 
 import pytest
 
-if sys.version_info[0] < 3:
-    pytest.skip("Skipping async tests", allow_module_level=True)
-else:
-    from tornado.ioloop import TimeoutError
-    from tornado.httpclient import HTTPResponse
-    from odin.adapters.async_proxy import AsyncProxyTarget, AsyncProxyAdapter
-    from unittest.mock import Mock
-    from tests.adapters.test_proxy import ProxyTestHandler, ProxyTargetTestFixture, ProxyTestServer
-    from odin.util import convert_unicode_to_string
-    from tests.utils import log_message_seen
-    from tests.async_utils import AwaitableTestFixture, asyncio_fixture_decorator
-    try:
-        from unittest.mock import AsyncMock
-    except ImportError:
-        from tests.async_utils import AsyncMock
+from tornado.ioloop import TimeoutError
+from tornado.httpclient import HTTPResponse
+from odin.adapters.async_proxy import AsyncProxyTarget, AsyncProxyAdapter
+from unittest.mock import Mock
+from tests.adapters.test_proxy import ProxyTestHandler, ProxyTargetTestFixture, ProxyTestServer
+from tests.utils import log_message_seen
+from tests.async_utils import AwaitableTestFixture, asyncio_fixture_decorator
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    from tests.async_utils import AsyncMock
 
 @pytest.fixture(scope="class")
 def test_proxy_target():
@@ -252,7 +248,7 @@ class TestAsyncProxyAdapter():
         for tgt in range(async_proxy_adapter_fixture.num_targets):
             node_str = 'node_{}'.format(tgt)
             assert node_str in response.data
-            assert convert_unicode_to_string(response.data[node_str]) == ProxyTestHandler.param_tree.get("")
+            assert response.data[node_str] == ProxyTestHandler.param_tree.get("")
 
     @pytest.mark.asyncio
     async def test_adapter_get_proxy_path(self, async_proxy_adapter_fixture):
@@ -292,7 +288,7 @@ class TestAsyncProxyAdapter():
             "{}/{}".format(node, path), async_proxy_adapter_fixture.request)
 
         assert async_proxy_adapter_fixture.adapter.param_tree.get('')['status'][node]['status_code'] == 200
-        assert convert_unicode_to_string(response.data["more"]["replace"]) == "been replaced"
+        assert response.data["more"]["replace"] == "been replaced"
 
     @pytest.mark.asyncio
     async def test_adapter_get_bad_path(self, async_proxy_adapter_fixture):

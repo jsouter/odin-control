@@ -3,12 +3,7 @@ import json
 
 import pytest
 
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock
-else:                         # pragma: no cover
-    from mock import Mock
-    pytest.skip("Skipping async tests", allow_module_level=True)
-
+from unittest.mock import Mock
 from odin.http.handlers.base import BaseApiHandler, API_VERSION
 from tests.handlers.fixtures import test_api_handler
 

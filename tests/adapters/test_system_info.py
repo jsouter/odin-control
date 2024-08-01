@@ -4,14 +4,9 @@ Tim Nicholls, STFC Application Engineering Group.
 """
 
 import sys
-
 import pytest
 
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock
-else:                         # pragma: no cover
-    from mock import Mock
-
+from unittest.mock import Mock
 from odin.adapters.system_info import SystemInfoAdapter, SystemInfo
 
 @pytest.fixture(scope="class")

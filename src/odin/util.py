@@ -7,13 +7,7 @@ import sys
 from tornado import version_info
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
-
-PY3 = sys.version_info >= (3,)
-
-if PY3:
-    from odin.async_util import get_async_event_loop, wrap_async
-    unicode = str
-
+from odin.async_util import get_async_event_loop, wrap_async
 
 def decode_request_body(request):
     """Extract the body from a request.
@@ -33,36 +27,6 @@ def decode_request_body(request):
     return body
 
 
-def convert_unicode_to_string(obj):
-    """
-    Convert all unicode parts of a dictionary or list to standard strings.
-
-    This method will not handle special characters well due to the difference between uft-8
-    and unicode.
-
-    It is recursive, so if the object passed is a collection (dict or list) it will call
-    itself for each object in the collection
-
-    :param obj: the dictionary, list, or unicode string
-
-    :return: the same data type as obj, but with unicode strings converted to python strings.
-    """
-    if PY3:
-        # Python 3 strings ARE unicode, so no need to encode them
-        return obj  # pragma: no cover
-    if isinstance(obj, dict):
-        # Obj is a dictionary. We need to recurse this method over each key and value
-        return {convert_unicode_to_string(key): convert_unicode_to_string(value)
-                for key, value in obj.items()}
-    elif isinstance(obj, list):
-        # Obj is a list. We need to recurse over each object in the list
-        return [convert_unicode_to_string(element) for element in obj]
-    elif isinstance(obj, unicode):
-        return obj.encode("utf-8")
-    # Obj is none of the above, just return it
-    return obj
-
-
 def wrap_result(result, is_async=True):
     """
     Conditionally wrap a result in an aysncio Future if being used in async code on python 3.
@@ -74,7 +38,7 @@ def wrap_result(result, is_async=True):
 
     :return: either the result or a Future wrapping the result
     """
-    if is_async and PY3:
+    if is_async:
         return wrap_async(result)
     else:
         return result
@@ -96,9 +60,8 @@ def run_in_executor(executor, func, *args):
 
     :return: a Future wrapping the task
     """
-    # In python 3, try to get the current asyncio event loop, otherwise create a new one
-    if PY3:
-        get_async_event_loop()
+    # Try to get the current asyncio event loop, otherwise create a new one
+    get_async_event_loop()
 
     # Run the function in the specified executor, handling tornado version 4 where there was no
     # run_in_executor implementation

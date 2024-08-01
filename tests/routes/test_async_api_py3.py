@@ -1,14 +1,10 @@
 import sys
-
 import pytest
 
-if sys.version_info[0] < 3:
-    pytest.skip("Skipping async tests", allow_module_level=True)
-else:
-    try:
-        from unittest.mock import AsyncMock
-    except ImportError:
-        from tests.async_utils import AsyncMock
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    from tests.async_utils import AsyncMock
 
 
 from odin.http.routes.api import ApiRoute

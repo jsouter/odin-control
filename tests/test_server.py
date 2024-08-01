@@ -4,10 +4,7 @@ import requests
 import sys
 
 import pytest
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest import mock
-else:                         # pragma: no cover
-    import mock
+from unittest import mock
 
 from odin.http.server import HttpServer
 from odin import main

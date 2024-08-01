@@ -15,10 +15,6 @@ from odin.adapters.base_parameter_tree import (
 
 __all__ = ['AsyncParameterAccessor', 'AsyncParameterTree', 'ParameterTreeError']
 
-# if sys.version_info < (3,7):
-#     async_create_task = asyncio.ensure_future
-# else:
-#     async_create_task = asyncio.create_task
 try:
     async_create_task = asyncio.create_task
 except AttributeError:

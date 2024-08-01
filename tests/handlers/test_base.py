@@ -1,14 +1,8 @@
 import sys
 import json
-
 import pytest
 
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock
-else:                         # pragma: no cover
-    from mock import Mock
-
-
+from unittest.mock import Mock
 from odin.http.handlers.base import BaseApiHandler, API_VERSION, ApiError, validate_api_request
 from odin.adapters.adapter import ApiAdapterResponse
 from tests.handlers.fixtures import test_base_handler, test_base_handler_cors

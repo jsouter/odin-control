@@ -7,17 +7,11 @@ import sys
 import platform
 import psutil
 import logging
-
 import pytest
 
-if sys.version_info[0] == 3:  # pragma: no cover
-    from unittest.mock import Mock, patch
-else:                         # pragma: no cover
-    from mock import Mock, patch
-
+from unittest.mock import Mock, patch
 from odin.adapters.system_status import SystemStatusAdapter, SystemStatus, Singleton
 from odin.adapters.parameter_tree import ParameterTreeError
-
 from tests.utils import log_message_seen
 
 
