@@ -9,6 +9,21 @@ used directly, but form the basis for concrete synchronous and asynchronous impl
 James Hogge, Tim Nicholls, STFC Application Engineering Group.
 """
 
+from typing import *  # when done, use direct imports only!!
+
+Primitive = Union[bool, str, int, float]
+PrimitiveT = TypeVar("PrimitiveT", bool, str, int, float)
+
+Getter = Union[Primitive, Callable[[], Primitive]]
+Setter = Union[Primitive, Callable[[Primitive], Any]]  # setters may have responses
+# TODO: do setters return a specific type of response??
+MetaValues = Union[Primitive, List[Primitive]]
+Meta = Dict[str, Union[Primitive, List[Primitive]]]  # allowed values is a list of primitives
+Leaf = Union[
+    Tuple[Primitive],
+    Tuple[Primitive, Meta],
+    Tuple[Getter, Setter],
+    Tuple[Getter, Setter, Meta]]
 
 class ParameterTreeError(Exception):
     """Simple error class for raising parameter tree parameter tree exceptions."""
@@ -46,7 +61,10 @@ class BaseParameterAccessor(object):
     # writeable status depending on specified accessors
     AUTO_METADATA_FIELDS = ("type", "writeable")
 
-    def __init__(self, path, getter=None, setter=None, **kwargs):
+    def __init__(self, path: str,
+                 getter: Optional[Getter] = None,
+                 setter: Optional[Setter] = None,
+                 **kwargs: MetaValues):
         """Initialise the BaseParameterAccessor instance.
 
         This constructor initialises the BaseParameterAccessor instance, storing
@@ -65,7 +83,7 @@ class BaseParameterAccessor(object):
         self._set = setter
 
         # Initialize metadata dict
-        self.metadata = {}
+        self.metadata: Meta = {}
 
         # Check metadata keyword arguments are valid
         for arg in kwargs:
@@ -81,7 +99,7 @@ class BaseParameterAccessor(object):
         else:
             self.metadata["writeable"] = True
 
-    def get(self, with_metadata=False):
+    def get(self, with_metadata: bool = False):
         """Get the value of the parameter.
 
         This method returns the value of the parameter, or the value returned
@@ -178,7 +196,7 @@ class BaseParameterTree(object):
 
     METADATA_FIELDS = ["name", "description"]
 
-    def __init__(self, tree, mutable=False):
+    def __init__(self, tree, mutable: bool = False):
         """Initialise the BaseParameterTree object.
 
         This constructor recursively initialises the BaseParameterTree object, based on the
@@ -216,6 +234,10 @@ class BaseParameterTree(object):
         # Recursively check and initialise the tree
         self._tree = self._build_tree(tree)
 
+        if not hasattr(self, "accessor_cls"):  # to satisfy typing
+            self.accessor_cls = BaseParameterTree
+
+
     @property
     def tree(self):
         """Return tree object for this parameter tree node.
@@ -224,7 +246,7 @@ class BaseParameterTree(object):
         """
         return self._tree
 
-    def get(self, path, with_metadata=False):
+    def get(self, path: str, with_metadata: bool = False):
         """Get the values of parameters in a tree.
 
         This method returns the values at and below a specified path in the parameter tree.
@@ -265,7 +287,7 @@ class BaseParameterTree(object):
         # Return the populated tree at the appropriate path
         return self._populate_tree({levels[-1]: subtree}, with_metadata)
 
-    def set(self, path, data):
+    def set(self, path: str, data):
         """Set the values of the parameters in a tree.
 
         This method sets the values of parameters in a tree, based on the data passed to it
@@ -316,7 +338,7 @@ class BaseParameterTree(object):
         else:
             merge_parent[int(levels[-1])] = merged
 
-    def delete(self, path=''):
+    def delete(self, path: str = ''):
         """
         Remove Parameters from a Mutable Tree.
 
@@ -357,7 +379,7 @@ class BaseParameterTree(object):
         except (KeyError, ValueError, IndexError):
             raise ParameterTreeError("Invalid path: {}".format(path))
 
-    def _build_tree(self, node, path=''):
+    def _build_tree(self, node, path: str = ''):
         """Recursively build and expand out a tree or node.
 
         This internal method is used to recursively build and expand a tree or node,
@@ -421,7 +443,7 @@ class BaseParameterTree(object):
             if key not in self.METADATA_FIELDS:
                 yield key, val
 
-    def _populate_tree(self, node, with_metadata=False):
+    def _populate_tree(self, node, with_metadata: bool = False):
         """Recursively populate a tree with values.
 
         This internal method recursively populates the tree with parameter values, or
@@ -456,7 +478,7 @@ class BaseParameterTree(object):
 
         return node
 
-    def _merge_tree(self, node, new_data, cur_path):
+    def _merge_tree(self, node, new_data, cur_path: str):
         """Recursively merge a tree with new values.
 
         This internal method recursively merges a tree with new values. Called by the set()
