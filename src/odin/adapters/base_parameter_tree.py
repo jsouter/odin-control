@@ -25,6 +25,18 @@ Leaf = Union[
     Tuple[Getter, Setter],
     Tuple[Getter, Setter, Meta]]
 
+_LeafOrList = Union[Leaf, List[Leaf]]
+
+TreeDict = Mapping[str, _LeafOrList]
+# the recursive dictionary that is passive to (Base)ParameterTree to build the tree
+
+_AccessorOrList = Union["BaseParameterAccessor", List["BaseParameterAccessor"]]
+Tree = Mapping[str, _AccessorOrList] 
+# this is the full built tree
+
+Node = Union[_LeafOrList, _AccessorOrList, TreeDict, Tree, "BaseParameterTree"]
+
+
 class ParameterTreeError(Exception):
     """Simple error class for raising parameter tree parameter tree exceptions."""
 
@@ -99,7 +111,7 @@ class BaseParameterAccessor(object):
         else:
             self.metadata["writeable"] = True
 
-    def get(self, with_metadata: bool = False):
+    def get(self, with_metadata: bool = False) -> Union[Primitive, Meta]:
         """Get the value of the parameter.
 
         This method returns the value of the parameter, or the value returned
@@ -120,7 +132,7 @@ class BaseParameterAccessor(object):
         # If metadata is requested, replace the value with a dict containing the value itself
         # plus metadata fields
         if with_metadata:
-            value = {"value": value}
+            value: Meta = {"value": value}
             value.update(self.metadata)
 
         return value
@@ -196,7 +208,7 @@ class BaseParameterTree(object):
 
     METADATA_FIELDS = ["name", "description"]
 
-    def __init__(self, tree, mutable: bool = False):
+    def __init__(self, tree: TreeDict, mutable: bool = False):
         """Initialise the BaseParameterTree object.
 
         This constructor recursively initialises the BaseParameterTree object, based on the
@@ -229,7 +241,7 @@ class BaseParameterTree(object):
         self.mutable = mutable
 
         # list of paths to mutable parts. Not sure this is best solution
-        self.mutable_paths = []
+        self.mutable_paths: List[str] = []
 
         # Recursively check and initialise the tree
         self._tree = self._build_tree(tree)
@@ -379,7 +391,7 @@ class BaseParameterTree(object):
         except (KeyError, ValueError, IndexError):
             raise ParameterTreeError("Invalid path: {}".format(path))
 
-    def _build_tree(self, node, path: str = ''):
+    def _build_tree(self, node: Node, path: str = ''):
         """Recursively build and expand out a tree or node.
 
         This internal method is used to recursively build and expand a tree or node,

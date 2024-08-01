@@ -7,10 +7,7 @@ from tornado import version_info
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
 from odin.async_util import get_async_event_loop, wrap_async
-
-def decode_request_body(request: "ApiAdapterRequest") -> "BodyType":
-=======
-from typing import TYPE_CHECKING, Union
+from typing import *
 if TYPE_CHECKING:
     from odin.adapters.adapter import ApiAdapterResponse, ApiAdapterRequest
     from asyncio import Future
@@ -54,7 +51,7 @@ def wrap_result(result, is_async=True):
         return result
 
 
-def run_in_executor(executor: ThreadPoolExecutor,
+def run_in_executor(executor: "ThreadPoolExecutor",
                     func: Callable[..., Any],
                     *args: Any) -> Awaitable[Any]:
     """

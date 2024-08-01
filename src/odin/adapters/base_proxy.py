@@ -16,7 +16,7 @@ import tornado.httpclient
 from tornado.escape import json_decode, json_encode
 
 from odin.adapters.parameter_tree import ParameterTree, ParameterTreeError
-
+from typing import *
 
 @dataclass
 class ProxyRequest:
